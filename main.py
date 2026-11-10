@@ -47,7 +47,7 @@ def download_youtube_video(url: str, output_path: str) -> str:
         'max_filesize': 48 * 1024 * 1024, 
         'quiet': True,
         'no_warnings': True,
-        'extractor_args': {'youtube': {'player_client': ['ios', 'android']}},
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android'],'getpot': ['default']}},
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
@@ -65,7 +65,7 @@ def download_youtube_video_range(url: str, start_sec: int, end_sec: int, output_
             'end_time': end_sec,
         }]),
         'force_keyframes_at_cuts': True,
-        'extractor_args': {'youtube': {'player_client': ['ios', 'android']}},
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android'],'getpot': ['default']}},
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
