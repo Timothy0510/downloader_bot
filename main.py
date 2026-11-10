@@ -26,27 +26,30 @@ def run_flask():
 
 # Функция для получения прямой ссылки на MP4 через сторонний API
 async def get_video_download_url(youtube_url: str) -> str:
-    # Используем публичный открытый API для конвертации YouTube в MP4
-    api_url = f"https://cobalt.tools"
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "url": youtube_url,
-        "vQuality": "720",  # Ограничиваем качество до 720p для надежности
-        "isAudioOnly": False
-    }
+    # Используем альтернативный стабильный API для загрузки
+    api_url = f"https://de-cobalt.tools"
+    # Если этот не сработает, попробуем зеркало напрямую
+    async def fetch(url, payload):
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=headers, timeout=10) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data.get("url")
+        except:
+            return None
+        return None
+
+    payload = {"url": youtube_url, "vQuality": "720", "isAudioOnly": False}
     
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(api_url, json=payload, headers=headers) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data.get("url")
-    except Exception as e:
-        print(f"Ошибка API: {e}")
-    return None
+    # Пытаемся скачать через резервное зеркало API
+    result = await fetch(api_url, payload)
+    if not result:
+        # Вторая попытка через основное зеркало с другими настройками
+        result = await fetch("https://wuk.sh", payload)
+        
+    return result
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
